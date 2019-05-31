@@ -53,3 +53,57 @@ cp -Rf net_speeder $NS_PATH
 
 echo -e "\033[36m net_speeder installed. \033[0m"
 echo -e "\033[36m Usage: nohup ${NS_PATH}/net_speeder $INTERFACE \"ip\" >/dev/null 2>&1 & \033[0m"
+
+
+echo "#!/bin/bash
+#chkconfig: 345 85 15
+#description: netspeeder start script.
+### BEGIN INIT INFO
+# Provides:          LZH
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: The NetSpeeder
+### END INIT INFO
+
+start() {
+	nohup ${NS_PATH}/net_speeder $INTERFACE \"ip\" >/dev/null 2>&1 &
+	echo 'NetSpeeder Started!';
+}
+
+stop() {
+	sync;
+	for PID in \`ps aux|grep -E 'net_speeder'|grep -v grep|awk '{print \$2}'\`; do
+		kill -s 9 \$PID >/dev/null;
+	done;
+	echo 'NetSpeeder Stoped!';
+}
+
+case \"\$1\" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	*)
+		echo \$\"Usage: \$prog {start|stop|restart}\"
+		exit 1
+esac">/etc/rc.d/init.d/netspeederd
+chmod 775 /etc/rc.d/init.d/netspeederd
+
+if [ "$SysName" == 'centos' ]; then
+	chkconfig netspeederd on;
+else
+	update-rc.d -f netspeederd defaults;
+fi;
+
+cd ..
+rm -rf epel-release-5-4.noarch.rpm epel-release-6-8.noarch.rpm epel-release-5-4.noarch.rpm net_speeder
+
+service netspeederd start
