@@ -80,6 +80,10 @@ stop() {
 	echo 'NetSpeeder Stoped!';
 }
 
+status() {
+	ps aux|grep net_speeder|grep -v grep;
+}
+
 case \"\$1\" in
 	start)
 		start
@@ -87,6 +91,9 @@ case \"\$1\" in
 	stop)
 		stop
 		;;
+	status)
+	        status
+                ;;
 	restart)
 		stop
 		start
